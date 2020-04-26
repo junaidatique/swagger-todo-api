@@ -1,0 +1,175 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Node Swagger Todo App
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths 
+basePath: /
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  # root endpoint
+  /:
+    get: 
+      x-swagger-router-controller: "TodoController"
+      description: "This enpoint returns all the todos available in the database."
+      operationId: "getAllTodos"
+      parameters: []
+      responses: 
+        "200":
+          description: "An array of todos"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/Todo"
+    post:
+      x-swagger-router-controller: "TodoController"
+      description: "Add a new Todo"
+      operationId: "addTodo"
+      produces:
+        - "application/json"
+      parameters: 
+        - in: body
+          name: todo
+          description: "the todo to be added"
+          required: true
+          schema: 
+            $ref: "#/definitions/Todo"
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Todo"
+        # responses may fall through to errors
+  /todo/{id}:
+    get:
+      x-swagger-router-controller: "TodoController"
+      description: "Retrieve a single todo by Id"
+      operationId: "findTodoById"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "id of the todo parameter"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Todo Response"
+          schema:
+            $ref: "#/definitions/Todo"
+        "409":
+          description: "Error Condition"
+    delete: 
+      x-swagger-router-controller: "TodoController"
+      description: "Delete a todo by Id"
+      operationId: "deleteTodoById"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "id of the todo parameter"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "204":
+          description: "Todo deleted"
+    put:
+      x-swagger-router-controller: "TodoController"
+      description: "Update a single todo by id"
+      operationId: "updateTodoById"
+      parameters:
+        - in: "path"
+          name: "id"
+          description: "id of the todo parameter"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: body
+          name: "updated_todo"
+          description: "the todo to be added"
+          required: true
+          schema: 
+            $ref: "#/definitions/Todo"
+      responses:
+        "200":
+          description: "Todo Response"
+          schema:
+            $ref: "#/definitions/Todo"
+        "400":
+          description: "Error Condition"
+  /hello:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hello_world
+    get:
+      description: Returns 'Hello' to the caller
+      # used as the method name of the controller
+      operationId: hello
+      parameters:
+        - name: name
+          in: query
+          description: The name of the person to whom to say hello
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/HelloWorldResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  Todo:
+    type: "object"
+    properties: 
+      todo_id:
+        type: "integer"
+        description: "Id of todo item"
+      todo:
+        type: "string"
+        description: "The todo item"
+      dateCreated:
+        type: "string"
+        format: "date-time"
+        description: "creation date of todo item, set by server"
+      author:
+        type: "string"
+        description: "Creator or owner of the todo"
+      dueDate:
+        type: "string"
+        format: "date-time"
+        description: "When the todo is due"
+      completed: 
+        type: "boolean"
+        description: "Indicates if the todo has been completed."
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
